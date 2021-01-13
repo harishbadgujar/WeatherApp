@@ -7,13 +7,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.example.weatherapp.databinding.ActivityMainBinding
+import com.example.weatherapp.models.Location
+import com.example.weatherapp.screens.bookmark.BookMarkFragment
+import com.example.weatherapp.screens.city.CityFragment
 import com.example.weatherapp.screens.help.HelpFragment
 import com.example.weatherapp.screens.home.HomeFragment
 
 /**
  * Created by shande on 02-01-2021.
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), HomeFragment.HomeFragmentListener {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,19 +27,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addHomeFragment() {
-        addFragment(HomeFragment.newInstance(),HomeFragment.TAG)
+        val homeFragment = HomeFragment.newInstance()
+        homeFragment.setListener(this)
+        addFragment(homeFragment, HomeFragment.TAG)
     }
 
     private fun addHelpFragment() {
-        addFragment(HelpFragment.newInstance(),HelpFragment.TAG)
+        addFragment(HelpFragment.newInstance(), HelpFragment.TAG)
     }
 
-    private fun addFragment(fragment: Fragment, tag:String) {
+    private fun addBookMarkFragment() {
+        addFragment(BookMarkFragment.newInstance(), BookMarkFragment.TAG)
+    }
+
+    private fun addCityFragment(location: Location) {
+        addFragment(CityFragment.newInstance(location = location), CityFragment.TAG)
+    }
+
+    private fun addFragment(fragment: Fragment, tag: String) {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
         fragmentTransaction.apply {
-            add(binding.fragmentContainer.id, fragment,tag)
+            add(binding.fragmentContainer.id, fragment, tag)
             setReorderingAllowed(true)
-            if (fragment !is HomeFragment){
+            if (fragment !is HomeFragment) {
                 addToBackStack(null)
             }
             commit()
@@ -57,6 +70,14 @@ class MainActivity : AppCompatActivity() {
 
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onFabClick() {
+        addBookMarkFragment()
+    }
+
+    override fun onLocationSelected(location: Location) {
+        addCityFragment(location)
     }
 
 }

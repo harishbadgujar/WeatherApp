@@ -1,30 +1,30 @@
 package com.example.weatherapp.screens.city
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.weatherapp.R
+import com.example.weatherapp.databinding.FragmentCityBinding
+import com.example.weatherapp.models.Location
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val LOCATION = "location"
 
 /**
  * Created by shande on 10-01-2021.
  */
 class CityFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var location: Location? = null
+    private lateinit var binding: FragmentCityBinding
+    private lateinit var viewModel: CityFragmentViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            location = it.getParcelable(LOCATION)
         }
     }
 
@@ -32,27 +32,52 @@ class CityFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_city, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_city, container, false)
+        return binding.root
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.tvName.text = location?.lat.toString()
+        initUI()
+        initViewModel()
+        observeData()
+        location?.let {
+            viewModel.getCityWeatherDetails(it)
+        }
+    }
+
+    private fun initUI() {
+
+    }
+
+    private fun initViewModel() {
+        viewModel = ViewModelProvider(this, CityViewModelFactory(CityFragmentRepository())).get(
+            CityFragmentViewModel::class.java
+        )
+    }
+
+    private fun observeData() {
+
+    }
+
 
     companion object {
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
          *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
+         * @param location Parameter 1.
          * @return A new instance of fragment CityFragment.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(location: Location) =
             CityFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putParcelable(LOCATION, location)
                 }
             }
+
+        const val TAG = "TAG"
     }
 }
