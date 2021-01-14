@@ -16,7 +16,7 @@ import com.example.weatherapp.screens.home.HomeFragment
 /**
  * Created by shande on 02-01-2021.
  */
-class MainActivity : AppCompatActivity(), HomeFragment.HomeFragmentListener {
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity(), HomeFragment.HomeFragmentListener {
 
     private fun addHomeFragment() {
         val homeFragment = HomeFragment.newInstance()
-        homeFragment.setListener(this)
+        homeFragment.setListener(homeFragmentListener)
         addFragment(homeFragment, HomeFragment.TAG)
     }
 
@@ -37,7 +37,9 @@ class MainActivity : AppCompatActivity(), HomeFragment.HomeFragmentListener {
     }
 
     private fun addBookMarkFragment() {
-        addFragment(BookMarkFragment.newInstance(), BookMarkFragment.TAG)
+        val bookMarkFragment = BookMarkFragment.newInstance()
+        bookMarkFragment.setListener(bookMarkFragmentListener)
+        addFragment(bookMarkFragment, BookMarkFragment.TAG)
     }
 
     private fun addCityFragment(location: Location) {
@@ -53,6 +55,14 @@ class MainActivity : AppCompatActivity(), HomeFragment.HomeFragmentListener {
                 addToBackStack(null)
             }
             commit()
+        }
+    }
+
+    private fun popUpFragment(tag: String) {
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        supportFragmentManager.findFragmentByTag(tag)?.let {
+            fragmentTransaction.remove(it)
+            fragmentTransaction.commit()
         }
     }
 
@@ -72,12 +82,20 @@ class MainActivity : AppCompatActivity(), HomeFragment.HomeFragmentListener {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onFabClick() {
-        addBookMarkFragment()
+    private val homeFragmentListener = object : HomeFragment.HomeFragmentListener {
+        override fun onFabClick() {
+            addBookMarkFragment()
+        }
+
+        override fun onLocationSelected(location: Location) {
+            addCityFragment(location)
+        }
+
     }
 
-    override fun onLocationSelected(location: Location) {
-        addCityFragment(location)
+    private val bookMarkFragmentListener = object : BookMarkFragment.BookMarkFragmentListener {
+        override fun onLocationBookMarked() {
+            popUpFragment(BookMarkFragment.TAG)
+        }
     }
-
 }

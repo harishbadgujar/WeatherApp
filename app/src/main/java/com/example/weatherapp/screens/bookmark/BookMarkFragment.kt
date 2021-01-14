@@ -5,10 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherapp.R
 import com.example.weatherapp.models.Location
 import com.example.weatherapp.models.LocationDao
+import com.example.weatherapp.network.Status
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -26,6 +28,7 @@ class BookMarkFragment : Fragment(), OnMapReadyCallback {
     private lateinit var selectedLocation: LatLng
     private lateinit var marker: Marker
     private lateinit var viewModel: BookMarkViewModel
+    private lateinit var bookMarkFragmentListener: BookMarkFragmentListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +49,7 @@ class BookMarkFragment : Fragment(), OnMapReadyCallback {
             childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         initViewModel()
+        observeData()
         btnBookMark.setOnClickListener {
             val location: Location = Location().apply {
                 lat = selectedLocation.latitude
@@ -60,6 +64,25 @@ class BookMarkFragment : Fragment(), OnMapReadyCallback {
             this,
             BookMarkViewModelFactory(BookMarkRepository((LocationDao)))
         ).get(BookMarkViewModel::class.java)
+    }
+
+    private fun observeData() {
+        viewModel.locationData.observe(viewLifecycleOwner, Observer {
+            when (it.status) {
+
+                Status.LOADING -> {
+
+                }
+
+                Status.SUCCESS -> {
+                    bookMarkFragmentListener.onLocationBookMarked()
+                }
+
+                Status.FAILURE -> {
+
+                }
+            }
+        })
     }
 
     /**
@@ -88,6 +111,14 @@ class BookMarkFragment : Fragment(), OnMapReadyCallback {
         marker =
             mMap.addMarker(MarkerOptions().position(selectedLocation).title("Marker in Sydney"))
         mMap.animateCamera(CameraUpdateFactory.newLatLng(selectedLocation))
+    }
+
+    fun setListener(bookMarkFragmentListener: BookMarkFragmentListener) {
+        this.bookMarkFragmentListener = bookMarkFragmentListener
+    }
+
+    interface BookMarkFragmentListener {
+        fun onLocationBookMarked()
     }
 
     companion object {

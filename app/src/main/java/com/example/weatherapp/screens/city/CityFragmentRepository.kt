@@ -14,7 +14,11 @@ import retrofit2.Response
  */
 class CityFragmentRepository {
 
-    fun getCityWeatherDetails(location: Location) {
+    fun getCityWeatherDetails(
+        location: Location,
+        onSuccess: (apiResponse: ApiResponse?) -> Unit,
+        onFailed: () -> Unit
+    ) {
         val request = ApiClient.createService(ApiService::class.java)
         val apiCall = request.getCityWeatherDetails(
             lat = location.lat,
@@ -23,11 +27,11 @@ class CityFragmentRepository {
         )
         apiCall.enqueue(object : Callback<ApiResponse> {
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                print("onFailure")
+                onFailed()
             }
 
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                print("onResponse")
+                onSuccess(response.body())
             }
 
         })
